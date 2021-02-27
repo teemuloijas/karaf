@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -32,6 +34,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.api.console.SessionFactory;
 import org.apache.karaf.shell.support.ShellUtil;
 import org.apache.karaf.util.jaas.JaasHelper;
+import org.apache.sshd.common.util.net.SshdSocketAddress;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.apache.sshd.server.channel.ChannelSession;
@@ -44,11 +47,12 @@ import org.apache.sshd.server.shell.ShellFactory;
  * Shell.
  */
 public class ShellFactoryImpl implements ShellFactory {
-
     private SessionFactory sessionFactory;
+    private String[] allowedIps;
 
-    public ShellFactoryImpl(SessionFactory sessionFactory) {
+    public ShellFactoryImpl(SessionFactory sessionFactory, String[] allowedIps) {
         this.sessionFactory = sessionFactory;
+        this.allowedIps = allowedIps;
     }
 
     @Override
@@ -96,7 +100,22 @@ public class ShellFactoryImpl implements ShellFactory {
         @Override
         public void start(ChannelSession channelSession, Environment environment) throws IOException {
             this.session = channelSession.getServerSession();
+            List<InetAddress> externalIps = SshdSocketAddress.getExternalNetwork4Addresses();
             try {
+                if (allowedIps != null) {
+                    boolean found = false;
+                    for ( String ip : allowedIps) {
+                        for (InetAddress extIp : externalIps) {
+                            if (extIp.getHostAddress().contains(ip)) {
+                                found = true;
+                            }
+                        }
+                    }
+                    if (!found) {
+                        throw new IOException("Disconnecting");
+                    }
+                }
+
                 final Subject subject = session.getAttribute(KarafJaasAuthenticator.SUBJECT_ATTRIBUTE_KEY);
                 String encoding = getEncoding(environment);
                 terminal = new SshTerminal(environment, in, out, encoding);
