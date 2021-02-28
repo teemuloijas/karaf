@@ -1,5 +1,14 @@
 language: java
 
+addons:
+  sonarcloud:
+    organization: "mestarit"
+    token:
+      secure: $SONAR_TOKEN
+
+script:
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=teemuloijas_karaf
+
 install:
   - mvn clean install -DskipTests | grep ERROR
   - echo "Successfully built Karaf."
