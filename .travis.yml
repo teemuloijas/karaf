@@ -7,7 +7,7 @@ addons:
       secure: $SONAR_TOKEN
 
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=teemuloijas_karaf
+  - mvn clean -DskipTests org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=teemuloijas_karaf
 
 install:
   - mvn clean install -DskipTests | grep ERROR || true
