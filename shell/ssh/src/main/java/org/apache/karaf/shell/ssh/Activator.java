@@ -169,6 +169,7 @@ public class Activator extends BaseActivator implements ManagedService {
         String welcomeBanner        = getString("welcomeBanner", null);
         String moduliUrl            = getString("moduli-url", null);
         boolean sftpEnabled         = getBoolean("sftpEnabled", true);
+        String[] allowedIps         = getStringArray("allowedIps", null);
 
         Path serverPrivateKeyPath = Paths.get(privateHostKey);
         Path serverPublicKeyPath = Paths.get(publicHostKey);
@@ -183,7 +184,7 @@ public class Activator extends BaseActivator implements ManagedService {
         server.setMacFactories(SshUtils.buildMacs(macs));
         server.setCipherFactories(SshUtils.buildCiphers(ciphers));
         server.setKeyExchangeFactories(SshUtils.buildKexAlgorithms(kexAlgorithms));
-        server.setShellFactory(new ShellFactoryImpl(sessionFactory));
+        server.setShellFactory(new ShellFactoryImpl(sessionFactory, allowedIps));
 
         if (sftpEnabled) {
             server.setCommandFactory(new ScpCommandFactory.Builder().withDelegate((channel, cmd) -> new ShellCommand(sessionFactory, cmd)).build());
