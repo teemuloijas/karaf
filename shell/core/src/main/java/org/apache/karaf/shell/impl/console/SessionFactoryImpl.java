@@ -18,6 +18,7 @@
  */
 package org.apache.karaf.shell.impl.console;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -172,9 +173,15 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
     @Override
     public Session create(InputStream in, PrintStream out, PrintStream err, Session parent) {
         synchronized (commandProcessor) {
+            String initialString = "text";
+            InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
+            if(in == null) {
+            	in = targetStream;
+            }
+            
             final Session session = new HeadlessSessionImpl(this, commandProcessor, in, out, err, parent);
             return session;
         }
