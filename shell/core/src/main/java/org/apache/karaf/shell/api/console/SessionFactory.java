@@ -70,7 +70,7 @@ public interface SessionFactory {
      * {@link org.apache.karaf.shell.api.console.Session#run()} can not be used.
      * All variables and the terminal properties from the parent session will be available.
      *
-     * @param in the input stream, can't be null because java.nio.channels.Channels doesn't allow it
+     * @param in the input stream, can be <code>null</code> if the session is only used to execute a command using {@link Session#execute(CharSequence)}
      * @param out the output stream
      * @param err the error stream
      * @param session the parent session
