@@ -173,15 +173,14 @@ public class SessionFactoryImpl extends RegistryImpl implements SessionFactory, 
     @Override
     public Session create(InputStream in, PrintStream out, PrintStream err, Session parent) {
         synchronized (commandProcessor) {
-            String initialString = "text";
-            InputStream targetStream = new ByteArrayInputStream(initialString.getBytes());
+            String s = "text";
+            InputStream emptyStream = new ByteArrayInputStream(s.getBytes());
             if (closed) {
                 throw new IllegalStateException("SessionFactory has been closed");
             }
             if(in == null) {
-            	in = targetStream;
+            	in = emptyStream;
             }
-            
             final Session session = new HeadlessSessionImpl(this, commandProcessor, in, out, err, parent);
             return session;
         }
